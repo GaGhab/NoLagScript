@@ -1,0 +1,197 @@
+-- Egg Visual Pet Name Randomizer (Chill UI)
+-- Made by: DangSei | UI Chillified by: MostHatedSei
+
+local plr = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
+gui.Name = "EggRandomizerUI"
+gui.ResetOnSpawn = false
+
+-- Main Frame
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 200, 0, 170)
+frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(45, 62, 80)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame)
+
+-- Title
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -30, 0.2, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.Text = "🌿 Egg Randomizer"
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.fromRGB(220, 240, 255)
+title.BackgroundTransparency = 1
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Close Button
+local close = Instance.new("TextButton", frame)
+close.Size = UDim2.new(0, 22, 0, 22)
+close.Position = UDim2.new(1, -26, 0, 2)
+close.Text = "✖"
+close.TextColor3 = Color3.fromRGB(255, 120, 120)
+close.BackgroundTransparency = 1
+close.Font = Enum.Font.GothamBold
+close.TextScaled = true
+close.MouseButton1Click:Connect(function()
+	gui:Destroy()
+end)
+
+-- Info Label
+local info = Instance.new("TextLabel", frame)
+info.Size = UDim2.new(1, -20, 0.15, 0)
+info.Position = UDim2.new(0, 10, 0.22, 0)
+info.Text = "⚠️ Doesn't work in Delta"
+info.TextScaled = true
+info.Font = Enum.Font.GothamSemibold
+info.TextColor3 = Color3.fromRGB(255, 215, 140)
+info.BackgroundTransparency = 1
+
+-- Extra Info
+local extra = Instance.new("TextLabel", frame)
+extra.Size = UDim2.new(1, -20, 0.1, 0)
+extra.Position = UDim2.new(0, 10, 0.36, 0)
+extra.Text = "🐣 Dino, Zen, Primal & Bug Supported"
+extra.TextScaled = true
+extra.Font = Enum.Font.Gotham
+extra.TextColor3 = Color3.fromRGB(180, 230, 200)
+extra.BackgroundTransparency = 1
+
+-- Roll Button
+local button = Instance.new("TextButton", frame)
+button.Size = UDim2.new(0.6, 0, 0.18, 0)
+button.Position = UDim2.new(0.2, 0, 0.52, 0)
+button.Text = "🌸 Roll Egg"
+button.TextScaled = true
+button.Font = Enum.Font.GothamSemibold
+button.BackgroundColor3 = Color3.fromRGB(174, 238, 238)
+button.TextColor3 = Color3.fromRGB(40, 40, 40)
+Instance.new("UICorner", button)
+
+-- KRNL Copy Link Button
+local krnlBtn = Instance.new("TextButton", frame)
+krnlBtn.Size = UDim2.new(0.6, 0, 0.15, 0)
+krnlBtn.Position = UDim2.new(0.2, 0, 0.73, 0)
+krnlBtn.Text = "📋 Copy KRNL Link"
+krnlBtn.TextScaled = true
+krnlBtn.Font = Enum.Font.GothamSemibold
+krnlBtn.BackgroundColor3 = Color3.fromRGB(150, 200, 255)
+krnlBtn.TextColor3 = Color3.fromRGB(20, 20, 20)
+Instance.new("UICorner", krnlBtn)
+
+krnlBtn.MouseButton1Click:Connect(function()
+	setclipboard("https://krnl.cat/")
+	krnlBtn.Text = "✅ Copied!"
+	task.wait(1)
+	krnlBtn.Text = "📋 Copy KRNL Link"
+end)
+
+-- Footer (smaller and more chill)
+local footer = Instance.new("TextLabel", frame)
+footer.Size = UDim2.new(1, -10, 0.05, 0)
+footer.Position = UDim2.new(0, 5, 0.935, 0)
+footer.Text = "Made by DangSei"
+footer.Font = Enum.Font.Gotham
+footer.TextColor3 = Color3.fromRGB(140, 140, 140)
+footer.BackgroundTransparency = 1
+footer.TextXAlignment = Enum.TextXAlignment.Center
+footer.TextScaled = false
+footer.TextSize = 10
+
+-- Egg Type Tables
+local dinoPets = {"T-Rex", "Brontosaurus", "Pterodactyl", "Triceratops", "Stegosaurus", "Raptor"}
+local zenPets = {"Kitsune", "Tanuki", "Nihonzaru", "Tanchozuru", "Kappa", "Shiba Inu"}
+local primalPets = {"Spinosaurus", "Ankylosaurus", "Dilophosaurus", "Pachycephalosaurus", "Iguanodon", "Parasaurolophus"}
+local bugPets = {"Dragonfly", "Caterpillar", "Snail", "Praying Mantis", "Giant Ant"}
+
+-- Get All Valid Eggs
+local function getAllEggs()
+	local eggs = {}
+	for _, obj in pairs(workspace:GetDescendants()) do
+		if obj:IsA("Model") then
+			local lower = obj.Name:lower()
+			if lower:find("dino") or lower:find("zen") or lower:find("primal") or lower:find("bug") then
+				table.insert(eggs, obj)
+			end
+		end
+	end
+	return eggs
+end
+
+-- Add Billboard Name Display
+local function addNameDisplay(egg, petName)
+	local existing = egg:FindFirstChild("PetNameDisplay")
+	if existing then existing:Destroy() end
+
+	local basePart = egg:FindFirstChildWhichIsA("BasePart") or egg.PrimaryPart
+	if not basePart then return end
+
+	local owner = egg:FindFirstChild("owner") or egg:FindFirstChild("Owner")
+	if owner and owner:IsA("ObjectValue") and owner.Value ~= plr then return end
+
+	local eggType = "Dino"
+	local lower = egg.Name:lower()
+	if lower:find("zen") then eggType = "Zen"
+	elseif lower:find("primal") then eggType = "Primal"
+	elseif lower:find("bug") then eggType = "Bug" end
+
+	local displayName = eggType .. " | " .. petName
+
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "PetNameDisplay"
+	billboard.Adornee = basePart
+	billboard.Size = UDim2.new(0, 110, 0, 14)
+	billboard.StudsOffset = Vector3.new(0, 2.8, 0)
+	billboard.AlwaysOnTop = true
+	billboard.Parent = egg
+
+	local label = Instance.new("TextLabel", billboard)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = displayName
+	label.Font = Enum.Font.Gotham
+	label.TextScaled = true
+	label.TextStrokeTransparency = 0.4
+	label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+	label.TextColor3 = Color3.fromHSV(0, 1, 1)
+
+	local hue = 0
+	local conn = game:GetService("RunService").RenderStepped:Connect(function()
+		if not label or not label.Parent then conn:Disconnect() return end
+		hue = (hue + 0.005) % 1
+		label.TextColor3 = Color3.fromHSV(hue, 1, 1)
+	end)
+end
+
+-- Button Logic
+button.MouseButton1Click:Connect(function()
+	local eggs = getAllEggs()
+	if #eggs == 0 then
+		button.Text = "❌ No eggs"
+		task.wait(1)
+		button.Text = "🌸 Roll Egg"
+		return
+	end
+
+	button.Text = "Rolling..."
+	button.Active = false
+
+	for i = 1, 15 do
+		for _, egg in pairs(eggs) do
+			local list = dinoPets
+			local n = egg.Name:lower()
+			if n:find("zen") then list = zenPets
+			elseif n:find("primal") then list = primalPets
+			elseif n:find("bug") then list = bugPets end
+			addNameDisplay(egg, list[math.random(#list)])
+		end
+		task.wait(0.08)
+	end
+
+	button.Text = "🌸 Roll Egg"
+	button.Active = true
+end)
